@@ -117,7 +117,7 @@ unsigned int BSANET::bsa_get_error_message(String^ details) {
 	if (details == nullptr)
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
-	details = extErrorString;
+	details = gcnew String(extErrorString);
 
 	return LIBBSA_OK;
 }
