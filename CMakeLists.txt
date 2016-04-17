@@ -8,65 +8,136 @@
 # General Settings
 ##############################
 
-cmake_minimum_required (VERSION 2.8.9)
+cmake_minimum_required (VERSION 2.8)
 project (libbsa)
+include(ExternalProject)
 
-set (PROJECT_SRC "${CMAKE_SOURCE_DIR}/src/genericbsa.cpp" "${CMAKE_SOURCE_DIR}/src/helpers.cpp" "${CMAKE_SOURCE_DIR}/src/libbsa.cpp" "${CMAKE_SOURCE_DIR}/src/tes3bsa.cpp" "${CMAKE_SOURCE_DIR}/src/tes4bsa.cpp")
+option(BUILD_SHARED_LIBS "Build a shared library" ON)
+option(PROJECT_STATIC_RUNTIME "Build with static runtime libs (/MT)" ON)
 
-set (PROJECT_SRC ${PROJECT_SRC} "${PROJECT_LIBS_DIR}/boost/libs/iostreams/src/file_descriptor.cpp")
+ExternalProject_Add(zlib
+                    PREFIX "external"
+                    URL "http://zlib.net/zlib-1.2.8.tar.gz"
+                    INSTALL_COMMAND "")
+ExternalProject_Get_Property(zlib SOURCE_DIR BINARY_DIR)
+set (ZLIB_INCLUDE_DIRS ${SOURCE_DIR} ${BINARY_DIR})
+IF (MSVC)
+    set (ZLIB_LIBRARIES optimized "${BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlibstatic${CMAKE_STATIC_LIBRARY_SUFFIX}"
+                    debug "${BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zlibstaticd${CMAKE_STATIC_LIBRARY_SUFFIX}")
+ELSE ()
+    set (ZLIB_LIBRARIES "${BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}z${CMAKE_STATIC_LIBRARY_SUFFIX}")
+ENDIF ()
 
-# Include source and library directories.
-include_directories ("${PROJECT_LIBS_DIR}/boost" "${PROJECT_LIBS_DIR}/utf8" "${PROJECT_LIBS_DIR}/zlib" "${CMAKE_SOURCE_DIR}/src")
+ExternalProject_Add(GTest
+                    PREFIX "external"
+                    URL "https://github.com/google/googletest/archive/release-1.7.0.tar.gz"
+                    INSTALL_COMMAND "")
+ExternalProject_Get_Property(GTest SOURCE_DIR BINARY_DIR)
+set (GTEST_INCLUDE_DIRS "${SOURCE_DIR}/include")
+set (GTEST_LIBRARIES "${BINARY_DIR}/${CMAKE_CFG_INTDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
-link_directories ("${PROJECT_LIBS_DIR}/zlib" )
+set (Boost_USE_STATIC_LIBS ${PROJECT_STATIC_RUNTIME})
+set (Boost_USE_MULTITHREADED ON)
+set (Boost_USE_STATIC_RUNTIME ${PROJECT_STATIC_RUNTIME})
+
+find_package(Boost REQUIRED COMPONENTS iostreams filesystem system locale)
+
+set (PROJECT_SRC "${CMAKE_SOURCE_DIR}/src/api/_bsa_handle_int.cpp"
+                 "${CMAKE_SOURCE_DIR}/src/api/genericbsa.cpp"
+                 "${CMAKE_SOURCE_DIR}/src/api/libbsa.cpp"
+                 "${CMAKE_SOURCE_DIR}/src/api/tes3bsa.cpp"
+                 "${CMAKE_SOURCE_DIR}/src/api/tes4bsa.cpp")
+
+set (PROJECT_HEADERS "${CMAKE_SOURCE_DIR}/include/libbsa/libbsa.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/_bsa_handle_int.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/bsa_asset.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/error.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/genericbsa.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/tes3bsa.h"
+                     "${CMAKE_SOURCE_DIR}/src/api/tes4bsa.h")
+
+source_group("Header Files" FILES ${PROJECT_HEADERS})
+
+set (TEST_SRC "${CMAKE_SOURCE_DIR}/src/test/main.cpp")
+
+include_directories("${CMAKE_SOURCE_DIR}/src"
+                    "${CMAKE_SOURCE_DIR}/include"
+                    ${Boost_INCLUDE_DIRS}
+                    ${GTEST_INCLUDE_DIRS}
+                    ${ZLIB_INCLUDE_DIRS})
 
 ##############################
 # Platform-Specific Settings
 ##############################
 
-# Settings when compiling for Windows.
-IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
-    IF (${PROJECT_LINK} MATCHES "STATIC")
-        add_definitions (-DLIBBSA_STATIC)
-    ELSE ()
-        add_definitions (-DLIBBSA_EXPORT)
-    ENDIF ()
-ENDIF ()
-
-# Settings when compiling on Windows.
-IF (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
-    set (PROJECT_LIBS libboost_locale-vc110-mt-1_52 libboost_filesystem-vc110-mt-1_52 libboost_system-vc110-mt-1_52 libboost_regex-vc110-mt-1_52 zlibstatic)
-    set (CMAKE_CXX_FLAGS "/EHsc")
-ENDIF ()
-
-# Settings when not cross-compiling.
-IF (CMAKE_SYSTEM_NAME MATCHES CMAKE_HOST_SYSTEM_NAME)
-    link_directories ("${PROJECT_LIBS_DIR}/boost/stage-${PROJECT_ARCH}/lib")
-ENDIF ()
-
 # Settings when compiling and cross-compiling on Linux.
 IF (CMAKE_HOST_SYSTEM_NAME MATCHES "Linux")
-    set (CMAKE_C_FLAGS  "-m${PROJECT_ARCH}")
-    set (CMAKE_CXX_FLAGS "-m${PROJECT_ARCH}")
-    set (CMAKE_EXE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
-    set (CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
-    set (CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc")
-
-    IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
-        link_directories ("${PROJECT_LIBS_DIR}/boost/stage-mingw-${PROJECT_ARCH}/lib")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -std=c++11 -fPIC")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fPIC")
+    IF (PROJECT_STATIC_RUNTIME)
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+        set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
     ENDIF ()
 
-    set (PROJECT_LIBS boost_locale boost_filesystem boost_regex boost_system zlibstatic)
+    set(PROJECT_LIBRARIES "pthread")
+ENDIF ()
+
+# Settings when compiling with MSVC.
+IF (MSVC)
+    # Update compiler flags.
+    IF (PROJECT_STATIC_RUNTIME)
+        FOREACH(flag
+            CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
+            CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_DEBUG_INIT
+            CMAKE_CXX_FLAGS_RELEASE  CMAKE_CXX_FLAGS_RELWITHDEBINFO
+            CMAKE_CXX_FLAGS_DEBUG  CMAKE_CXX_FLAGS_DEBUG_INIT)
+            STRING(REPLACE "/MD"  "/MT" "${flag}" "${${flag}}")
+            SET("${flag}" "${${flag}} /EHsc ")
+        ENDFOREACH()
+    ENDIF ()
+
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
 ENDIF ()
 
 ##############################
-# Actual Building
+# Targets
 ##############################
 
 # Build libbsa library.
-add_library           (bsa${PROJECT_ARCH} ${PROJECT_LINK} ${PROJECT_SRC})
-target_link_libraries (bsa${PROJECT_ARCH} ${PROJECT_LIBS})
+add_library           (bsa ${PROJECT_SRC} ${PROJECT_HEADERS})
+add_dependencies      (bsa zlib)
+target_link_libraries (bsa ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
 
 # Build libbsa tester.
-add_executable        (libbsa-tester "${CMAKE_SOURCE_DIR}/src/tester.cpp" "${PROJECT_LIBS_DIR}/boost/libs/iostreams/src/file_descriptor.cpp")
-target_link_libraries (libbsa-tester bsa${PROJECT_ARCH} ${PROJECT_LIBS})
+add_executable        (tests ${TEST_SRC})
+add_dependencies      (tests GTest)
+target_link_libraries (tests bsa ${GTEST_LIBRARIES} ${PROJECT_LIBRARIES})
+
+
+##############################
+# Set Target-Specific Flags
+##############################
+
+IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
+    IF (BUILD_SHARED_LIBS)
+        set_target_properties (bsa PROPERTIES COMPILE_DEFINITIONS "${COMPILE_DEFINITIONS} LIBBSA_EXPORT")
+    ELSE ()
+        set_target_properties (bsa PROPERTIES COMPILE_DEFINITIONS "${COMPILE_DEFINITIONS} LIBBSA_STATIC")
+        set_target_properties (tests PROPERTIES COMPILE_DEFINITIONS "${COMPILE_DEFINITIONS} LIBBSA_STATIC")
+    ENDIF ()
+ENDIF ()
+
+
+##############################
+# Post-Build Steps
+##############################
+
+IF (NOT DEFINED ENV{TRAVIS})
+    # Run Doxygen and LaTeX to generate readme
+    add_custom_command(TARGET bsa POST_BUILD
+        COMMAND doxygen Doxyfile
+        COMMAND "${CMAKE_SOURCE_DIR}/docs/latex/make.bat"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/docs")
+ENDIF ()

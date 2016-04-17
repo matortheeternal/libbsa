@@ -21,16 +21,31 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __LIBBSA_STREAMS_H__
-#define __LIBBSA_STREAMS_H__
+#include "libbsa/libbsa.h"
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <stdint.h>
+#include <iostream>
 
-namespace libbsa {
-    typedef boost::iostreams::stream< boost::iostreams::file_descriptor_sink > ofstream;
-    typedef boost::iostreams::stream< boost::iostreams::file_descriptor_source > ifstream;
-    typedef boost::iostreams::stream< boost::iostreams::file_descriptor > fstream;
+#include <boost/filesystem.hpp>
+#include <gtest/gtest.h>
+
+TEST(bsa_open, shouldFailIfNullHandlePointerIsGiven) {
+    FAIL();
 }
 
-#endif
+TEST(bsa_open, shouldFailIfNullPathIsGiven) {
+    FAIL();
+}
+
+TEST(bsa_open, shouldFailIfNonExistentPathIsGiven) {
+    FAIL();
+}
+
+TEST(bsa_open, shouldSucceedIfValidPathIsGiven) {
+    FAIL();
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
