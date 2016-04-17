@@ -62,17 +62,10 @@ namespace BSAWrapper {
 	public ref class BSANET
 	{
 	public:
-		_bsa_handle_int* bh;
 
 		/*------------------------------
 		Types
 		------------------------------*/
-
-		/**
-		@brief A structure that holds all game-specific data used by libbsa.
-		@details Holds an index of all the files inside a BSA file. Abstracts the definition of libbsa' internal state while still providing type safety across the library's functions. Multiple handles can also be made for each BSA file, though it should be kept in mind that libbsa is not thread-safe.
-		*/
-		typedef struct _bsa_handle_int * bsa_handle;
 
 		/* Holds the source and destination paths for an asset to be added to a BSA.
 		These paths must be valid until the BSA is saved, as they are not actually
@@ -88,6 +81,9 @@ namespace BSAWrapper {
 			String^ sourcePath;  //The path of the asset in the external filesystem.
 			String^ destPath;    //The path of the asset when it is in the BSA.
 		};
+
+		// handle for use by the wrapper
+		_bsa_handle_int* bh;
 
 		// constructor for the wrapper
 		BSANET() {};

@@ -133,7 +133,7 @@ Lifecycle Management Functions
 
 /* Opens a BSA file at path, returning a handle.  */
 unsigned int BSANET::bsa_open(String^ path) {
-	if (bh == nullptr || path == nullptr)  //Check for valid args.
+	if (path == nullptr)  //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
 	//Set the locale to get encoding conversions working correctly.
