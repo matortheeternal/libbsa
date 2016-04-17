@@ -36,6 +36,7 @@ along with libbsa.  If not, see
 
 using namespace std;
 using namespace BSAWrapper;
+using namespace System::Runtime::InteropServices;
 
 /*------------------------------
 Global variables
@@ -98,10 +99,10 @@ bool BSANET::bsa_is_compatible(const unsigned int versionMajor, const unsigned i
 		return false;
 }
 
-void BSANET::bsa_get_version(unsigned int * const versionMajor, unsigned int * const versionMinor, unsigned int * const versionPatch) {
-	*versionMajor = LIBBSA_VERSION_MAJOR;
-	*versionMinor = LIBBSA_VERSION_MINOR;
-	*versionPatch = LIBBSA_VERSION_PATCH;
+void BSANET::bsa_get_version(unsigned int ^ versionMajor, unsigned int ^ versionMinor, unsigned int ^ versionPatch) {
+	versionMajor = LIBBSA_VERSION_MAJOR;
+	versionMinor = LIBBSA_VERSION_MINOR;
+	versionPatch = LIBBSA_VERSION_PATCH;
 }
 
 
@@ -112,11 +113,11 @@ Error Handling Functions
 /* Outputs a string giving the a message containing the details of the
 last error or warning encountered by a function called for the given
 game handle. */
-unsigned int BSANET::bsa_get_error_message(const char ** const details) {
+unsigned int BSANET::bsa_get_error_message(String^ details) {
 	if (details == nullptr)
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
-	*details = extErrorString;
+	details = extErrorString;
 
 	return LIBBSA_OK;
 }
@@ -131,7 +132,7 @@ Lifecycle Management Functions
 ----------------------------------*/
 
 /* Opens a BSA file at path, returning a handle.  */
-unsigned int BSANET::bsa_open(bsa_handle * const bh, const char * const path) {
+unsigned int BSANET::bsa_open(bsa_handle bh, String^ path) {
 	if (bh == nullptr || path == nullptr)  //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -141,14 +142,17 @@ unsigned int BSANET::bsa_open(bsa_handle * const bh, const char * const path) {
 	locale loc(global_loc, new boost::filesystem::detail::utf8_codecvt_facet());
 	boost::filesystem::path::imbue(loc);
 
+	// convert path to char*
+	char* pathc = (char*)(void*) Marshal::StringToHGlobalAnsi(path);
+
 	//Create handle for the appropriate BSA type.
 	try {
-		if (libbsa::tes3::IsBSA(path))
-			*bh = new libbsa::tes3::BSA(path);
-		else if (libbsa::tes4::IsBSA(path))
-			*bh = new libbsa::tes4::BSA(path);
+		if (libbsa::tes3::IsBSA(pathc))
+			bh = new libbsa::tes3::BSA(pathc);
+		else if (libbsa::tes4::IsBSA(pathc))
+			bh = new libbsa::tes4::BSA(pathc);
 		else
-			*bh = new libbsa::tes4::BSA(path);  //Arbitrary choice of BSA type.
+			bh = new libbsa::tes4::BSA(pathc);  //Arbitrary choice of BSA type.
 	}
 	catch (libbsa::error& e) {
 		return c_error(e.code(), e.what());
@@ -163,7 +167,7 @@ unsigned int BSANET::bsa_open(bsa_handle * const bh, const char * const path) {
 /* Create a BSA at the specified path. The 'flags' argument consists of a set
 of bitwise OR'd constants defining the version of the BSA and the
 compression level used (and whether the compression is forced). */
-unsigned int BSANET::bsa_save(bsa_handle bh, const char * const path, const unsigned int flags) {
+unsigned int BSANET::bsa_save(bsa_handle bh, String^ path, const unsigned int flags) {
 	if (bh == nullptr || path == nullptr)  //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -194,8 +198,11 @@ unsigned int BSANET::bsa_save(bsa_handle bh, const char * const path, const unsi
 	if (!(compression & (compression - 1)))
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Invalid compression level specified.");
 
+	// convert path to char*
+	char* pathc = (char*)(void*)Marshal::StringToHGlobalAnsi(path);
+
 	try {
-		bh->Save(path, version, compression);
+		bh->Save(pathc, version, compression);
 	}
 	catch (libbsa::error& e) {
 		return c_error(e.code(), e.what());
@@ -221,8 +228,8 @@ Content Reading Functions
 /* Gets an array of all the assets in the given BSA that match the contentPath
 given. contentPath is a POSIX Extended regular expression that all asset
 paths within the BSA will be compared to. */
-unsigned int BSANET::bsa_get_assets(bsa_handle bh, const char * const contentPath, char *** const assetPaths, size_t * const numAssets) {
-	if (bh == nullptr || contentPath == nullptr || assetPaths == nullptr || numAssets == nullptr) //Check for valid args.
+unsigned int BSANET::bsa_get_assets(bsa_handle bh, String^ contentPath, cli::array<String^>^ assetPaths) {
+	if (bh == nullptr || contentPath == nullptr || assetPaths == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
 	//Free memory if in use.
@@ -235,13 +242,14 @@ unsigned int BSANET::bsa_get_assets(bsa_handle bh, const char * const contentPat
 	}
 
 	//Init values.
-	*assetPaths = nullptr;
-	*numAssets = 0;
+	assetPaths = nullptr;
 
 	//Build regex expression. Also check that it is valid.
 	boost::regex regex;
+	char* ccontentPath = (char*)(void*)Marshal::StringToHGlobalAnsi(contentPath);
+
 	try {
-		regex = boost::regex(contentPath, boost::regex::extended | boost::regex::icase);
+		regex = boost::regex(ccontentPath, boost::regex::extended | boost::regex::icase);
 	}
 	catch (boost::regex_error& e) {
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, e.what());
@@ -271,20 +279,29 @@ unsigned int BSANET::bsa_get_assets(bsa_handle bh, const char * const contentPat
 		return c_error(e.code(), e.what());
 	}
 
-	*assetPaths = bh->extAssets;
-	*numAssets = bh->extAssetsNum;
+	// convert char** to array<String^>
+	char** cassetPaths = bh->extAssets;
+	std::vector<std::string> vAssets(cassetPaths, cassetPaths + bh->extAssetsNum);
+	assetPaths = gcnew cli::array<String^>(vAssets.size());
+	for (int i = 0; i < vAssets.size(); i++)
+	{
+		assetPaths[i] = gcnew String(vAssets[i].c_str());
+	}
 
 	return LIBBSA_OK;
 }
 
 /* Checks if a specific asset, found within the BSA at assetPath, is in the given BSA. */
-unsigned int BSANET::bsa_contains_asset(bsa_handle bh, const char * const assetPath, bool * const result) {
+unsigned int BSANET::bsa_contains_asset(bsa_handle bh, String^ assetPath, bool^ result) {
 	if (bh == nullptr || assetPath == nullptr || result == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
-	string assetStr = libbsa::FixPath(assetPath);
+	// convert assetPath to char*
+	char* cassetPath = (char*)(void*)Marshal::StringToHGlobalAnsi(assetPath);
 
-	*result = bh->HasAsset(assetStr);
+	string assetStr = libbsa::FixPath(cassetPath);
+
+	result = bh->HasAsset(assetStr);
 
 	return LIBBSA_OK;
 }
@@ -295,7 +312,7 @@ Content Writing Functions
 ------------------------------*/
 
 /* Replaces all the assets in the given BSA with the given assets. */
-unsigned int BSANET::bsa_set_assets(bsa_handle bh, const bsa_asset ^ const assets, const size_t numAssets) {
+unsigned int BSANET::bsa_set_assets(bsa_handle bh, cli::array<bsa_asset^>^ assets) {
 	if (bh == nullptr || assets == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -303,7 +320,7 @@ unsigned int BSANET::bsa_set_assets(bsa_handle bh, const bsa_asset ^ const asset
 }
 
 /* Adds a specific asset to a BSA. */
-unsigned int BSANET::bsa_add_asset(bsa_handle bh, const bsa_asset asset) {
+unsigned int BSANET::bsa_add_asset(bsa_handle bh, bsa_asset^ asset) {
 	if (bh == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -311,7 +328,7 @@ unsigned int BSANET::bsa_add_asset(bsa_handle bh, const bsa_asset asset) {
 }
 
 /* Removes a specific asset, found at assetPath, from a BSA. */
-unsigned int BSANET::bsa_remove_asset(bsa_handle bh, const char * const assetPath) {
+unsigned int BSANET::bsa_remove_asset(bsa_handle bh, String^ assetPath) {
 	if (bh == nullptr || assetPath == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -327,7 +344,7 @@ Content Extraction Functions
 given destPath. contentPath is a path ending in a filename given as a POSIX
 Extended regular expression that all asset paths within the BSA will be
 compared to. Directory structure is preserved. */
-unsigned int BSANET::bsa_extract_assets(bsa_handle bh, const char * const contentPath, const char * destPath, char *** const assetPaths, size_t * const numAssets, const bool overwrite) {
+unsigned int BSANET::bsa_extract_assets(bsa_handle bh, String^ contentPath, String^ destPath, cli::array<String^>^ assetPaths, bool overwrite) {
 	if (bh == nullptr || contentPath == nullptr || destPath == nullptr || assetPaths == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -341,13 +358,15 @@ unsigned int BSANET::bsa_extract_assets(bsa_handle bh, const char * const conten
 	}
 
 	//Init values.
-	*assetPaths = nullptr;
-	*numAssets = 0;
+	assetPaths = nullptr;
+
+	// convert contentPath to char*
+	char* ccontentPath = (char*)(void*)Marshal::StringToHGlobalAnsi(contentPath);
 
 	//Build regex expression. Also check that it is valid.
 	boost::regex regex;
 	try {
-		regex = boost::regex(string(reinterpret_cast<const char*>(contentPath)), boost::regex::extended | boost::regex::icase);
+		regex = boost::regex(string(reinterpret_cast<const char*>(ccontentPath)), boost::regex::extended | boost::regex::icase);
 	}
 	catch (boost::regex_error& e) {
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, e.what());
@@ -360,9 +379,12 @@ unsigned int BSANET::bsa_extract_assets(bsa_handle bh, const char * const conten
 	if (temp.empty())
 		return LIBBSA_OK;
 
+	// convert destPath to char*
+	char* cdestPath = (char*)(void*)Marshal::StringToHGlobalAnsi(destPath);
+
 	//Extract files.
 	try {
-		bh->Extract(temp, string(reinterpret_cast<const char*>(destPath)), overwrite);
+		bh->Extract(temp, string(reinterpret_cast<const char*>(cdestPath)), overwrite);
 	}
 	catch (libbsa::error& e) {
 		return c_error(e.code(), e.what());
@@ -385,56 +407,32 @@ unsigned int BSANET::bsa_extract_assets(bsa_handle bh, const char * const conten
 		return c_error(e.code(), e.what());
 	}
 
-	*assetPaths = bh->extAssets;
-	*numAssets = bh->extAssetsNum;
+	// convert char** to array<String^>
+	char** cassetPaths = bh->extAssets;
+	std::vector<std::string> vAssets(cassetPaths, cassetPaths + bh->extAssetsNum);
+	assetPaths = gcnew cli::array<String^>(vAssets.size());
+	for (int i = 0; i < vAssets.size(); i++)
+	{
+		assetPaths[i] = gcnew String(vAssets[i].c_str());
+	}
 
 	return LIBBSA_OK;
 }
 
 /* Extracts a specific asset, found at assetPath, from a given BSA, to destPath. */
-unsigned int BSANET::bsa_extract_asset(bsa_handle bh, const char * const assetPath, const char * const destPath, const bool overwrite) {
+unsigned int BSANET::bsa_extract_asset(bsa_handle bh, String^ assetPath, String^ destPath, bool overwrite) {
 	if (bh == nullptr || assetPath == nullptr || destPath == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
-	string assetStr = libbsa::FixPath(assetPath);
+	// convert assetPath to char*
+	char* cassetPath = (char*)(void*)Marshal::StringToHGlobalAnsi(assetPath);
+	// convert destPath to char*
+	char* cdestPath = (char*)(void*)Marshal::StringToHGlobalAnsi(destPath);
+
+	string assetStr = libbsa::FixPath(cassetPath);
 
 	try {
-		bh->Extract(assetStr, string(reinterpret_cast<const char*>(destPath)), overwrite);
-	}
-	catch (libbsa::error& e) {
-		return c_error(e.code(), e.what());
-	}
-
-	return LIBBSA_OK;
-}
-
-/* Extracts a specific asset, found at assetPath, from a given BSA, to memory. */
-unsigned int BSANET::bsa_extract_asset_to_memory(bsa_handle bh, const char * const assetPath, uint8_t** _data, size_t* _size) {
-	if (bh == nullptr || assetPath == nullptr || _data == nullptr || _size == nullptr) //Check for valid args.
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-	string assetStr = libbsa::FixPath(assetPath);
-
-	try {
-		bh->Extract(assetStr, _data, _size);
-	}
-	catch (libbsa::error& e) {
-		return c_error(e.code(), e.what());
-	}
-
-	return LIBBSA_OK;
-}
-
-/*--------------------------------
-Misc. Functions
---------------------------------*/
-
-unsigned int BSANET::bsa_calc_checksum(bsa_handle bh, const char * const assetPath, uint32_t * const checksum) {
-	if (bh == nullptr || assetPath == nullptr || checksum == nullptr) //Check for valid args.
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-	try {
-		*checksum = bh->CalcChecksum(libbsa::FixPath(assetPath));
+		bh->Extract(assetStr, string(reinterpret_cast<const char*>(cdestPath)), overwrite);
 	}
 	catch (libbsa::error& e) {
 		return c_error(e.code(), e.what());
