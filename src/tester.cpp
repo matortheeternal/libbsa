@@ -81,7 +81,7 @@ int main() {
 
     libbsa::ofstream out(boost::filesystem::path("libbsa-tester.txt"));
     if (!out.good()){
-        std::cout << "File could not be opened for reading.";
+        out << "File could not be opened for reading.";
         return 1;
     }
 

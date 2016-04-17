@@ -52,3 +52,7 @@ ipch/
 docs/html/
 docs/latex/
 libbsa-tester.txt
+cli-windows/Debug/
+cli-windows/Release/
+cli-windows/libbsa/Release/
+cli-windows/libbsa/Debug/

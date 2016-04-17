@@ -21,6 +21,9 @@
     <http://www.gnu.org/licenses/>.
 */
 
+// Error C4996 'strcpy': This function or variable may be unsafe.Consider using 
+// strcpy_s instead.  To disable deprecation, use _CRT_SECURE_NO_WARNINGS.
+#define _CRT_SECURE_NO_WARNINGS
 #include "helpers.h"
 #include "libbsa.h"
 #include "error.h"

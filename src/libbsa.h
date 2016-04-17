@@ -50,6 +50,7 @@
 
 #ifndef __LIBBSA_H__
 #define __LIBBSA_H__
+#define LIBBSA_EXPORT
 
 #include <stddef.h>
 #include <stdint.h>
