@@ -132,7 +132,7 @@ Lifecycle Management Functions
 ----------------------------------*/
 
 /* Opens a BSA file at path, returning a handle.  */
-unsigned int BSANET::bsa_open(bsa_handle bh, String^ path) {
+unsigned int BSANET::bsa_open(String^ path) {
 	if (bh == nullptr || path == nullptr)  //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -167,7 +167,7 @@ unsigned int BSANET::bsa_open(bsa_handle bh, String^ path) {
 /* Create a BSA at the specified path. The 'flags' argument consists of a set
 of bitwise OR'd constants defining the version of the BSA and the
 compression level used (and whether the compression is forced). */
-unsigned int BSANET::bsa_save(bsa_handle bh, String^ path, const unsigned int flags) {
+unsigned int BSANET::bsa_save(String^ path, const unsigned int flags) {
 	if (bh == nullptr || path == nullptr)  //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -216,7 +216,7 @@ unsigned int BSANET::bsa_save(bsa_handle bh, String^ path, const unsigned int fl
 
 /* Closes the BSA associated with the given handle, freeing any memory
 allocated during its use. */
-void BSANET::bsa_close(bsa_handle bh) {
+void BSANET::bsa_close() {
 	delete bh;
 }
 
@@ -228,7 +228,7 @@ Content Reading Functions
 /* Gets an array of all the assets in the given BSA that match the contentPath
 given. contentPath is a POSIX Extended regular expression that all asset
 paths within the BSA will be compared to. */
-unsigned int BSANET::bsa_get_assets(bsa_handle bh, String^ contentPath, cli::array<String^>^ assetPaths) {
+unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ assetPaths) {
 	if (bh == nullptr || contentPath == nullptr || assetPaths == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -292,7 +292,7 @@ unsigned int BSANET::bsa_get_assets(bsa_handle bh, String^ contentPath, cli::arr
 }
 
 /* Checks if a specific asset, found within the BSA at assetPath, is in the given BSA. */
-unsigned int BSANET::bsa_contains_asset(bsa_handle bh, String^ assetPath, bool^ result) {
+unsigned int BSANET::bsa_contains_asset(String^ assetPath, bool^ result) {
 	if (bh == nullptr || assetPath == nullptr || result == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -312,7 +312,7 @@ Content Writing Functions
 ------------------------------*/
 
 /* Replaces all the assets in the given BSA with the given assets. */
-unsigned int BSANET::bsa_set_assets(bsa_handle bh, cli::array<bsa_asset^>^ assets) {
+unsigned int BSANET::bsa_set_assets(cli::array<bsa_asset^>^ assets) {
 	if (bh == nullptr || assets == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -320,7 +320,7 @@ unsigned int BSANET::bsa_set_assets(bsa_handle bh, cli::array<bsa_asset^>^ asset
 }
 
 /* Adds a specific asset to a BSA. */
-unsigned int BSANET::bsa_add_asset(bsa_handle bh, bsa_asset^ asset) {
+unsigned int BSANET::bsa_add_asset(bsa_asset^ asset) {
 	if (bh == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -328,7 +328,7 @@ unsigned int BSANET::bsa_add_asset(bsa_handle bh, bsa_asset^ asset) {
 }
 
 /* Removes a specific asset, found at assetPath, from a BSA. */
-unsigned int BSANET::bsa_remove_asset(bsa_handle bh, String^ assetPath) {
+unsigned int BSANET::bsa_remove_asset(String^ assetPath) {
 	if (bh == nullptr || assetPath == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -344,7 +344,7 @@ Content Extraction Functions
 given destPath. contentPath is a path ending in a filename given as a POSIX
 Extended regular expression that all asset paths within the BSA will be
 compared to. Directory structure is preserved. */
-unsigned int BSANET::bsa_extract_assets(bsa_handle bh, String^ contentPath, String^ destPath, cli::array<String^>^ assetPaths, bool overwrite) {
+unsigned int BSANET::bsa_extract_assets(String^ contentPath, String^ destPath, cli::array<String^>^ assetPaths, bool overwrite) {
 	if (bh == nullptr || contentPath == nullptr || destPath == nullptr || assetPaths == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 
@@ -420,7 +420,7 @@ unsigned int BSANET::bsa_extract_assets(bsa_handle bh, String^ contentPath, Stri
 }
 
 /* Extracts a specific asset, found at assetPath, from a given BSA, to destPath. */
-unsigned int BSANET::bsa_extract_asset(bsa_handle bh, String^ assetPath, String^ destPath, bool overwrite) {
+unsigned int BSANET::bsa_extract_asset(String^ assetPath, String^ destPath, bool overwrite) {
 	if (bh == nullptr || assetPath == nullptr || destPath == nullptr) //Check for valid args.
 		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
 

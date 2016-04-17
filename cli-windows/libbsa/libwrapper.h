@@ -62,6 +62,7 @@ namespace BSAWrapper {
 	public ref class BSANET
 	{
 	public:
+		_bsa_handle_int* bh;
 
 		/*------------------------------
 		Types
@@ -152,7 +153,7 @@ namespace BSAWrapper {
 		@param path A string containing the relative or absolute path to the BSA file to be opened.
 		@returns A return code.
 		*/
-		unsigned int bsa_open(bsa_handle bh, String^ path);
+		unsigned int bsa_open(String^ path);
 
 		/**
 		@brief Save a BSA at the given path. Not yet implemented.
@@ -162,14 +163,14 @@ namespace BSAWrapper {
 		@param flags A version flag and a compression flag combined using the bitwise OR operator.
 		@returns A return code.
 		*/
-		unsigned int bsa_save(bsa_handle bh, String^ path, const unsigned int flags);
+		unsigned int bsa_save(String^ path, const unsigned int flags);
 
 		/**
 		@brief Closes an existing handle.
 		@details Closes an existing handle, freeing any memory allocated during its use.
 		@param bh The handle to be destroyed.
 		*/
-		void bsa_close(bsa_handle bh);
+		void bsa_close();
 
 		///@}
 
@@ -188,7 +189,7 @@ namespace BSAWrapper {
 		@param numAssets The size of the outputted array. If no matching assets are found, this will be `0`.
 		@returns A return code.
 		*/
-		unsigned int bsa_get_assets(bsa_handle bh, String^ contentPath, cli::array<String^>^ assetPaths);
+		unsigned int bsa_get_assets(String^ contentPath, cli::array<String^>^ assetPaths);
 
 		/**
 		@brief Checks if a specific asset is in a BSA.
@@ -197,7 +198,7 @@ namespace BSAWrapper {
 		@param result The result of the check: `true` if the asset was found, `false` otherwise.
 		@returns A return code.
 		*/
-		unsigned int bsa_contains_asset(bsa_handle bh, String^ assetPath, bool^ result);
+		unsigned int bsa_contains_asset(String^ assetPath, bool^ result);
 
 		///@}
 
@@ -216,7 +217,7 @@ namespace BSAWrapper {
 		@param numAssets The size of the inputted array.
 		@returns A return code.
 		*/
-		unsigned int bsa_set_assets(bsa_handle bh, cli::array<bsa_asset^>^ assets);
+		unsigned int bsa_set_assets(cli::array<bsa_asset^>^ assets);
 
 		/**
 		@brief Adds an asset to a BSA handle. Not yet implemented.
@@ -225,7 +226,7 @@ namespace BSAWrapper {
 		@param asset The asset to be added.
 		@returns A return code.
 		*/
-		unsigned int bsa_add_asset(bsa_handle bh, bsa_asset^ asset);
+		unsigned int bsa_add_asset(bsa_asset^ asset);
 
 		/**
 		@brief Removes an asset from a BSA handle. Not yet implemented.
@@ -233,7 +234,7 @@ namespace BSAWrapper {
 		@param assetPath The asset to be removed.
 		@returns A return code.
 		*/
-		unsigned int bsa_remove_asset(bsa_handle bh, String^ assetPath);
+		unsigned int bsa_remove_asset(String^ assetPath);
 
 		///@}
 
@@ -254,7 +255,7 @@ namespace BSAWrapper {
 		@param overwrite If an asset is to be extracted to a path that already exists, this decides what will happen. If `true`, the existing file will be overwritten, otherwise the asset will not be extracted.
 		@returns A return code.
 		*/
-		unsigned int bsa_extract_assets(bsa_handle bh, String^ contentPath, String^ destPath, cli::array<String^>^ assetPaths, bool overwrite);
+		unsigned int bsa_extract_assets(String^ contentPath, String^ destPath, cli::array<String^>^ assetPaths, bool overwrite);
 
 		/* Extracts a specific asset, found at assetPath, from a given BSA, to destPath. */
 
@@ -267,7 +268,7 @@ namespace BSAWrapper {
 		@param overwrite If the asset is to be extracted to a path that already exists, this decides what will happen. If `true`, the existing file will be overwritten, otherwise the asset will not be extracted.
 		@returns A return code.
 		*/
-		unsigned int bsa_extract_asset(bsa_handle bh, String^ assetPath, String^ destPath, bool overwrite);
+		unsigned int bsa_extract_asset(String^ assetPath, String^ destPath, bool overwrite);
 
 		// TODO: 
 		//unsigned int bsa_extract_asset_to_memory(bsa_handle bh, String^ assetPath, cli::array<System::Byte>^ _data);
