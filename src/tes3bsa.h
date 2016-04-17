@@ -25,10 +25,9 @@
 #define __LIBBSA_TES3STRUCTS_H__
 
 #include "genericbsa.h"
+#include "streams.h"
 #include <stdint.h>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 /* File format infos:
     <http://www.uesp.net/wiki/Tes3Mod:BSA_File_Format>
@@ -37,39 +36,39 @@
     to the Tes3-type BSA, which is used by Morrowind.
 */
 
-namespace libbsa {
-    namespace tes3 {
-        class BSA : public GenericBsa {
-        public:
-            static const uint32_t VERSION = 0x100;
+namespace libbsa { namespace tes3 {
 
-            BSA(const std::string& path);
-            void Save(std::string path, const uint32_t version, const uint32_t compression);
+    const uint32_t BSA_VERSION_TES3 = 0x100;
 
-            //Check if a given file is a Tes3-type BSA.
-            static bool IsBSA(const std::string& path);
-        private:
-            std::pair<uint8_t*, size_t> ReadData(boost::filesystem::ifstream& in, const libbsa::BsaAsset& data);
+    struct Header {
+        uint32_t version;
+        uint32_t hashOffset;
+        uint32_t fileCount;
+    };
 
-            uint64_t CalcHash(const std::string& path);
+    struct FileRecord {
+        uint32_t size;
+        uint32_t offset;
+    };
 
-            uint32_t hashOffset;
+    class BSA : public _bsa_handle_int {
+    public:
+        BSA(const std::string& path);
+        void Save(std::string path, const uint32_t version, const uint32_t compression);
+    private:
+        std::pair<uint8_t*,size_t> ReadData(libbsa::ifstream& in, const libbsa::BsaAsset& data);
 
-            static bool hash_comp(const BsaAsset& first, const BsaAsset& second);
-            static bool path_comp(const BsaAsset& first, const BsaAsset& second);
+        uint64_t CalcHash(const std::string& path);
 
-            struct Header {
-                uint32_t version;
-                uint32_t hashOffset;
-                uint32_t fileCount;
-            };
+        uint32_t hashOffset;
+    };
 
-            struct FileRecord {
-                uint32_t size;
-                uint32_t offset;
-            };
-        };
-    }
-}
+    bool hash_comp(const BsaAsset& first, const BsaAsset& second);
+
+    bool path_comp(const BsaAsset& first, const BsaAsset& second);
+
+    //Check if a given file is a Tes3-type BSA.
+    bool IsBSA(const std::string& path);
+} }
 
 #endif

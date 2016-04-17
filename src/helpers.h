@@ -21,24 +21,24 @@
     <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __LIBBSA_ERROR_H__
-#define __LIBBSA_ERROR_H__
+#ifndef __LIBBSA_HELPERS_H__
+#define __LIBBSA_HELPERS_H__
 
-#include <exception>
 #include <string>
+#include <boost/unordered_map.hpp>
 
 namespace libbsa {
-    class error : public std::exception {
-    public:
-        error(const unsigned int code, const std::string& what) : _code(code), _what(what) {}
-        ~error() throw() {};
+    // std::string to null-terminated uint8_t string converter.
+    char * ToNewCString(const std::string& str);
 
-        unsigned int code() const { return _code; }
-        const char * what() const throw() { return _what.c_str(); }
-    private:
-        std::string _what;
-        unsigned int _code;
-    };
+    //Replaces all forwardslashes with backslashes, and lowercases letters.
+    std::string FixPath(const char * path);
+
+    uint32_t GetCrc32(const std::string& filename);
+
+    //Only ever need to convert between Windows-1252 and UTF-8.
+    std::string ToUTF8(const std::string& str);
+    std::string FromUTF8(const std::string& str);
 }
 
 #endif
