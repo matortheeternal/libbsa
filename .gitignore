@@ -56,3 +56,4 @@ cli-windows/Debug/
 cli-windows/Release/
 cli-windows/libbsa/Release/
 cli-windows/libbsa/Debug/
+cli-windows/CSharp-Example/obj/
