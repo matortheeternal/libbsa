@@ -25,7 +25,11 @@
 // strcpy_s instead.  To disable deprecation, use _CRT_SECURE_NO_WARNINGS.
 #define _CRT_SECURE_NO_WARNINGS
 #include "helpers.h"
-#include "libbsa.h"
+#ifndef _LIBBSA_WRAPPER_MODE
+	#include "libbsa.h"
+#else
+	#include "../cli-windows/libbsa/libwrapper.h"
+#endif
 #include "error.h"
 #include "streams.h"
 #include <sstream>

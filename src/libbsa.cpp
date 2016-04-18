@@ -21,6 +21,7 @@
     <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _LIBBSA_WRAPPER_MODE
 #include "libbsa.h"
 #include "helpers.h"
 #include "genericbsa.h"
@@ -429,3 +430,5 @@ LIBBSA unsigned int bsa_calc_checksum(bsa_handle bh, const char * const assetPat
 
     return LIBBSA_OK;
 }
+
+#endif

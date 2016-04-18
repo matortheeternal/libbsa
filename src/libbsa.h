@@ -48,6 +48,7 @@
     While the source path given in a bsa_asset object must be valid until the next call to bsa_save(), the memory allocated by the client for the path string may be freed at any point after the object's use.
 */
 
+#ifndef _LIBBSA_WRAPPER_MODE
 #ifndef __LIBBSA_H__
 #define __LIBBSA_H__
 #define LIBBSA_EXPORT
@@ -373,4 +374,5 @@ LIBBSA unsigned int bsa_calc_checksum(bsa_handle bh, const char * const assetPat
 #endif
 
 
+#endif
 #endif

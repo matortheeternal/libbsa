@@ -35,7 +35,7 @@ along with libbsa.  If not, see
 #include <boost/crc.hpp>
 
 using namespace std;
-using namespace BSAWrapper;
+using namespace libbsa;
 using namespace System::Runtime::InteropServices;
 
 /*------------------------------
@@ -46,39 +46,40 @@ const unsigned int LIBBSA_VERSION_MAJOR = 2;
 const unsigned int LIBBSA_VERSION_MINOR = 0;
 const unsigned int LIBBSA_VERSION_PATCH = 0;
 
-const char * extErrorString = nullptr;
+const char * extErrorString = NULL;
+
 
 /*------------------------------
 Constants
 ------------------------------*/
 
 // Return codes
-const unsigned int LIBBSA_OK = 0;
-const unsigned int LIBBSA_ERROR_INVALID_ARGS = 1;
-const unsigned int LIBBSA_ERROR_NO_MEM = 2;
-const unsigned int LIBBSA_ERROR_FILESYSTEM_ERROR = 3;
-const unsigned int LIBBSA_ERROR_BAD_STRING = 4;
-const unsigned int LIBBSA_ERROR_ZLIB_ERROR = 5;
-const unsigned int LIBBSA_ERROR_PARSE_FAIL = 6;
-const unsigned int LIBBSA_RETURN_MAX = BSAWrapper::LIBBSA_ERROR_PARSE_FAIL;
+const unsigned int libbsa::LIBBSA_OK = 0;
+const unsigned int libbsa::LIBBSA_ERROR_INVALID_ARGS = 1;
+const unsigned int libbsa::LIBBSA_ERROR_NO_MEM = 2;
+const unsigned int libbsa::LIBBSA_ERROR_FILESYSTEM_ERROR = 3;
+const unsigned int libbsa::LIBBSA_ERROR_BAD_STRING = 4;
+const unsigned int libbsa::LIBBSA_ERROR_ZLIB_ERROR = 5;
+const unsigned int libbsa::LIBBSA_ERROR_PARSE_FAIL = 6;
+const unsigned int libbsa::LIBBSA_RETURN_MAX = libbsa::LIBBSA_ERROR_PARSE_FAIL;
 
 /* BSA save flags */
 /* Use only one version flag. */
-const unsigned int LIBBSA_VERSION_TES3 = 0x00000001;
-const unsigned int LIBBSA_VERSION_TES4 = 0x00000002;
-const unsigned int LIBBSA_VERSION_TES5 = 0x00000004;
+const unsigned int libbsa::LIBBSA_VERSION_TES3 = 0x00000001;
+const unsigned int libbsa::LIBBSA_VERSION_TES4 = 0x00000002;
+const unsigned int libbsa::LIBBSA_VERSION_TES5 = 0x00000004;
 /* Use only one compression flag. */
-const unsigned int LIBBSA_COMPRESS_LEVEL_0 = 0x00000010;
-const unsigned int LIBBSA_COMPRESS_LEVEL_1 = 0x00000020;
-const unsigned int LIBBSA_COMPRESS_LEVEL_2 = 0x00000040;
-const unsigned int LIBBSA_COMPRESS_LEVEL_3 = 0x00000080;
-const unsigned int LIBBSA_COMPRESS_LEVEL_4 = 0x00000100;
-const unsigned int LIBBSA_COMPRESS_LEVEL_5 = 0x00000200;
-const unsigned int LIBBSA_COMPRESS_LEVEL_6 = 0x00000400;
-const unsigned int LIBBSA_COMPRESS_LEVEL_7 = 0x00000800;
-const unsigned int LIBBSA_COMPRESS_LEVEL_8 = 0x00001000;
-const unsigned int LIBBSA_COMPRESS_LEVEL_9 = 0x00002000;
-const unsigned int LIBBSA_COMPRESS_LEVEL_NOCHANGE = 0x00004000;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_0 = 0x00000010;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_1 = 0x00000020;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_2 = 0x00000040;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_3 = 0x00000080;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_4 = 0x00000100;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_5 = 0x00000200;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_6 = 0x00000400;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_7 = 0x00000800;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_8 = 0x00001000;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_9 = 0x00002000;
+const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_NOCHANGE = 0x00004000;
 
 unsigned int c_error(const unsigned int code, const char * what) {
 	extErrorString = what;
@@ -283,7 +284,7 @@ unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ as
 	char** cassetPaths = bh->extAssets;
 	std::vector<std::string> vAssets(cassetPaths, cassetPaths + bh->extAssetsNum);
 	assetPaths = gcnew cli::array<String^>(vAssets.size());
-	for (int i = 0; i < vAssets.size(); i++)
+	for (uint32_t i = 0; i < vAssets.size(); i++)
 	{
 		assetPaths[i] = gcnew String(vAssets[i].c_str());
 	}
@@ -312,20 +313,20 @@ Content Writing Functions
 ------------------------------*/
 
 /* Replaces all the assets in the given BSA with the given assets. */
-unsigned int BSANET::bsa_set_assets(cli::array<bsa_asset^>^ assets) {
-	if (bh == nullptr || assets == nullptr) //Check for valid args.
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-	return LIBBSA_OK;
-}
+//unsigned int BSANET::bsa_set_assets(cli::array<bsa_asset^>^ assets) {
+//	if (bh == nullptr || assets == nullptr) //Check for valid args.
+//		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
+//
+//	return LIBBSA_OK;
+//}
 
 /* Adds a specific asset to a BSA. */
-unsigned int BSANET::bsa_add_asset(bsa_asset^ asset) {
-	if (bh == nullptr) //Check for valid args.
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-	return LIBBSA_OK;
-}
+//unsigned int BSANET::bsa_add_asset(bsa_asset^ asset) {
+//	if (bh == nullptr) //Check for valid args.
+//		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
+//
+//	return LIBBSA_OK;
+//}
 
 /* Removes a specific asset, found at assetPath, from a BSA. */
 unsigned int BSANET::bsa_remove_asset(String^ assetPath) {
@@ -411,7 +412,7 @@ unsigned int BSANET::bsa_extract_assets(String^ contentPath, String^ destPath, c
 	char** cassetPaths = bh->extAssets;
 	std::vector<std::string> vAssets(cassetPaths, cassetPaths + bh->extAssetsNum);
 	assetPaths = gcnew cli::array<String^>(vAssets.size());
-	for (int i = 0; i < vAssets.size(); i++)
+	for (uint32_t i = 0; i < vAssets.size(); i++)
 	{
 		assetPaths[i] = gcnew String(vAssets[i].c_str());
 	}

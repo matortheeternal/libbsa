@@ -22,7 +22,11 @@
 */
 
 #include "genericbsa.h"
-#include "libbsa.h"
+#ifndef _LIBBSA_WRAPPER_MODE
+	#include "libbsa.h"
+#else
+	#include "../cli-windows/libbsa/libwrapper.h"
+#endif
 #include "error.h"
 #include "streams.h"
 #include <boost/filesystem.hpp>

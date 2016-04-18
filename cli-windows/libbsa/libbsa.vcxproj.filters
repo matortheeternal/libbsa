@@ -7,16 +7,16 @@
     <ClCompile Include="..\..\src\helpers.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\libbsa.cpp">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\tes3bsa.cpp">
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\tes4bsa.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\tester.cpp">
+    <ClCompile Include="libwrapper.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\libbsa.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,9 +30,6 @@
     <ClInclude Include="..\..\src\helpers.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\libbsa.h">
-      <Filter>headers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\streams.h">
       <Filter>headers</Filter>
     </ClInclude>
@@ -40,6 +37,12 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\tes4bsa.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="libwrapper.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\libbsa.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

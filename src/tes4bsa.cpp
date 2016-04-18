@@ -26,7 +26,11 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "tes4bsa.h"
 #include "error.h"
-#include "libbsa.h"
+#ifndef _LIBBSA_WRAPPER_MODE
+	#include "libbsa.h"
+#else
+	#include "../cli-windows/libbsa/libwrapper.h"
+#endif
 #include "streams.h"
 #include <vector>
 #include <cstring>

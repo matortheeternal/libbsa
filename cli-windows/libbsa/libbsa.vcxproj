@@ -78,6 +78,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>E:\dev\lib\boost_1_60_0;E:\dev\git\zlib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_LIBBSA_WRAPPER_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>E:\dev\git\zlib\Release;E:\dev\lib\googletest-release-1.7.0;E:\dev\lib\boost_1_60_0\stage-mingw-32\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -99,6 +100,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>E:\dev\lib\boost_1_60_0;E:\dev\git\zlib\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_LIBBSA_WRAPPER_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -128,6 +130,7 @@
     <ClInclude Include="..\..\src\streams.h" />
     <ClInclude Include="..\..\src\tes3bsa.h" />
     <ClInclude Include="..\..\src\tes4bsa.h" />
+    <ClInclude Include="libwrapper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\genericbsa.cpp" />
@@ -135,7 +138,7 @@
     <ClCompile Include="..\..\src\libbsa.cpp" />
     <ClCompile Include="..\..\src\tes3bsa.cpp" />
     <ClCompile Include="..\..\src\tes4bsa.cpp" />
-    <ClCompile Include="..\..\src\tester.cpp" />
+    <ClCompile Include="libwrapper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

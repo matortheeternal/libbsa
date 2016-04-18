@@ -1,31 +1,56 @@
-#pragma once
+#ifndef __LIBWRAPPER_H__
+#define __LIBWRAPPER_H__
 
 #include <stddef.h>
 #include <stdint.h>
 
 using namespace System;
 
-namespace BSAWrapper {
+/*------------------------------
+Types
+------------------------------*/
 
+/**
+@brief A structure that holds all game-specific data used by libbsa.
+@details Holds an index of all the files inside a BSA file. Abstracts the definition of libbsa' internal state while still providing type safety across the library's functions. Multiple handles can also be made for each BSA file, though it should be kept in mind that libbsa is not thread-safe.
+*/
+typedef struct _bsa_handle_int * bsa_handle;
+
+/* Holds the source and destination paths for an asset to be added to a BSA.
+These paths must be valid until the BSA is saved, as they are not actually
+written until then. */
+/**
+@struct bsa_asset
+@brief A structure that holds data about a file in a BSA.
+@details Maps the external filesystem path of an asset to a path internal to the BSA. Used when adding a file to a BSA. The external path must be remain valid after adding the asset until bsa_save() is next called, after which it is no longer necessary.
+@var bsa_asset::sourcePath The external filesystem path to the asset.
+@var bsa_asset::destPath The path of the asset within the BSA.
+*/
+struct bsa_asset {
+	char* sourcePath;  //The path of the asset in the external filesystem.
+	char* destPath;    //The path of the asset when it is in the BSA.
+};
+
+namespace libbsa {
 	/*********************//**
-	@name Return Codes
-	@brief Error codes signify an issue that caused a function to exit prematurely. If a function exits prematurely, a reversal of any changes made during its execution is attempted before it exits.
+    @name Return Codes
+    @brief Error codes signify an issue that caused a function to exit prematurely. If a function exits prematurely, a reversal of any changes made during its execution is attempted before it exits.
 	*************************/
 	///@{
 
-	const unsigned int LIBBSA_OK;  ///< The function completed successfully.
-	const unsigned int LIBBSA_ERROR_INVALID_ARGS;  ///< Invalid arguments were given for the function.
-	const unsigned int LIBBSA_ERROR_NO_MEM;  ///< The library was unable to allocate the required memory.
-	const unsigned int LIBBSA_ERROR_FILESYSTEM_ERROR;  ///< There was an error encountered while performing a filesystem interaction (eg. reading, writing).
-	const unsigned int LIBBSA_ERROR_BAD_STRING;  ///< A UTF-8 string contains characters that do not have Windows-1252 code points, or vice versa.
-	const unsigned int LIBBSA_ERROR_ZLIB_ERROR;  ///< zlib reported an error during file compression or decompression.
-	const unsigned int LIBBSA_ERROR_PARSE_FAIL;  ///< There was an error in parsing a BSA.
+	extern const unsigned int LIBBSA_OK;  ///< The function completed successfully.
+	extern const unsigned int LIBBSA_ERROR_INVALID_ARGS;  ///< Invalid arguments were given for the function.
+	extern const unsigned int LIBBSA_ERROR_NO_MEM;  ///< The library was unable to allocate the required memory.
+	extern const unsigned int LIBBSA_ERROR_FILESYSTEM_ERROR;  ///< There was an error encountered while performing a filesystem interaction (eg. reading, writing).
+	extern const unsigned int LIBBSA_ERROR_BAD_STRING;  ///< A UTF-8 string contains characters that do not have Windows-1252 code points, or vice versa.
+	extern const unsigned int LIBBSA_ERROR_ZLIB_ERROR;  ///< zlib reported an error during file compression or decompression.
+	extern const unsigned int LIBBSA_ERROR_PARSE_FAIL;  ///< There was an error in parsing a BSA.
 
 	/**
 	@brief Matches the value of the highest-numbered return code.
 	@details Provided in case clients wish to incorporate additional return codes in their implementation and desire some method of avoiding value conflicts.
 	*/
-	const unsigned int LIBBSA_RETURN_MAX;
+	extern const unsigned int LIBBSA_RETURN_MAX;
 	/* No doubt there will be more... */
 
 	///@}
@@ -35,9 +60,9 @@ namespace BSAWrapper {
 	*************************/
 	///@{
 
-	const unsigned int LIBBSA_VERSION_TES3;  ///< Specifies the BSA structure supported by TES III: Morrowind.
-	const unsigned int LIBBSA_VERSION_TES4;  ///< Specifies the BSA structure supported by TES IV: Oblivion.
-	const unsigned int LIBBSA_VERSION_TES5;  ///< Specifies the BSA structure supported by TES V:Skyrim, Fallout 3, Fallout: New Vegas.
+	extern const unsigned int LIBBSA_VERSION_TES3;  ///< Specifies the BSA structure supported by TES III: Morrowind.
+	extern const unsigned int LIBBSA_VERSION_TES4;  ///< Specifies the BSA structure supported by TES IV: Oblivion.
+	extern const unsigned int LIBBSA_VERSION_TES5;  ///< Specifies the BSA structure supported by TES V:Skyrim, Fallout 3, Fallout: New Vegas.
 
 	///@}
 	/*********************//**
@@ -46,44 +71,25 @@ namespace BSAWrapper {
 	*************************/
 	///@{
 
-	const unsigned int LIBBSA_COMPRESS_LEVEL_0;    ///< Use no compression.
-	const unsigned int LIBBSA_COMPRESS_LEVEL_1;  ///< Use the lowest level of compression.
-	const unsigned int LIBBSA_COMPRESS_LEVEL_2;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_3;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_4;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_5;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_6;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_7;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_8;
-	const unsigned int LIBBSA_COMPRESS_LEVEL_9;  ///< Use the highest level of compression.
-	const unsigned int LIBBSA_COMPRESS_LEVEL_NOCHANGE;  ///< Use the same level of compression as was used in the opened BSA.
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_0;    ///< Use no compression.
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_1;  ///< Use the lowest level of compression.
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_2;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_3;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_4;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_5;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_6;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_7;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_8;
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_9;  ///< Use the highest level of compression.
+	extern const unsigned int LIBBSA_COMPRESS_LEVEL_NOCHANGE;  ///< Use the same level of compression as was used in the opened BSA.
 
 
 	public ref class BSANET
 	{
 	public:
 
-		/*------------------------------
-		Types
-		------------------------------*/
-
-		/* Holds the source and destination paths for an asset to be added to a BSA.
-		These paths must be valid until the BSA is saved, as they are not actually
-		written until then. */
-		/**
-		@struct bsa_asset
-		@brief A structure that holds data about a file in a BSA.
-		@details Maps the external filesystem path of an asset to a path internal to the BSA. Used when adding a file to a BSA. The external path must be remain valid after adding the asset until bsa_save() is next called, after which it is no longer necessary.
-		@var bsa_asset::sourcePath The external filesystem path to the asset.
-		@var bsa_asset::destPath The path of the asset within the BSA.
-		*/
-		typedef ref struct bsa_asset {
-			String^ sourcePath;  //The path of the asset in the external filesystem.
-			String^ destPath;    //The path of the asset when it is in the BSA.
-		};
-
 		// handle for use by the wrapper
-		_bsa_handle_int* bh;
+		bsa_handle bh;
 
 		// constructor for the wrapper
 		BSANET() {};
@@ -213,7 +219,8 @@ namespace BSAWrapper {
 		@param numAssets The size of the inputted array.
 		@returns A return code.
 		*/
-		unsigned int bsa_set_assets(cli::array<bsa_asset^>^ assets);
+		// TODO:
+		//unsigned int bsa_set_assets(cli::array<libbsa::bsa_asset^>^ assets);
 
 		/**
 		@brief Adds an asset to a BSA handle. Not yet implemented.
@@ -222,7 +229,8 @@ namespace BSAWrapper {
 		@param asset The asset to be added.
 		@returns A return code.
 		*/
-		unsigned int bsa_add_asset(bsa_asset^ asset);
+		// TODO:
+		//unsigned int bsa_add_asset(bsa_asset^ asset);
 
 		/**
 		@brief Removes an asset from a BSA handle. Not yet implemented.
@@ -291,3 +299,5 @@ namespace BSAWrapper {
 		///@}
 	};
 }
+
+#endif
