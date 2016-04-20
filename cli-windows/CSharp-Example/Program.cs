@@ -19,16 +19,21 @@ namespace CSharp_Example {
             }
 
             bsa.bsa_open(path);
-            String error = "";
-            if (bsa.bsa_get_error_message(error) != 0) {
+            String error = bsa.bsa_get_error_message();
+            if (error != "") {
                 Console.WriteLine(error);
                 return;
             }
             Console.WriteLine("Opened " + path);
 
-            string[] entries = new string[0];
-            bsa.bsa_get_assets("", entries);
-            if (bsa.bsa_get_error_message(error) != 0) {
+            uint vmajor = bsa.bsa_get_version_major();
+            uint vminor = bsa.bsa_get_version_minor();
+            uint vpatch = bsa.bsa_get_version_patch();
+            Console.WriteLine("BSA Version: " + vmajor + "." + vminor + "." + vpatch);
+
+            string[] entries = bsa.bsa_get_assets(".*");
+            error = bsa.bsa_get_error_message();
+            if (error != "") {
                 Console.WriteLine(error);
                 return;
             }
@@ -37,7 +42,6 @@ namespace CSharp_Example {
             for (int i = 0; i < entries.Length; i++) {
                 Console.WriteLine(entries[i]);
             }
-            return;
         }
     }
 }

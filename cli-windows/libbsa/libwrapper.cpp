@@ -93,6 +93,7 @@ Version Functions
 
 /* Returns whether this version of libbsa is compatible with the given
 version of libbsa. */
+
 bool BSANET::bsa_is_compatible(const unsigned int versionMajor, const unsigned int versionMinor, const unsigned int versionPatch) {
 	if (versionMajor == 2 && versionMinor == 0 && versionPatch == 0)
 		return true;
@@ -100,10 +101,14 @@ bool BSANET::bsa_is_compatible(const unsigned int versionMajor, const unsigned i
 		return false;
 }
 
-void BSANET::bsa_get_version(unsigned int ^ versionMajor, unsigned int ^ versionMinor, unsigned int ^ versionPatch) {
-	versionMajor = LIBBSA_VERSION_MAJOR;
-	versionMinor = LIBBSA_VERSION_MINOR;
-	versionPatch = LIBBSA_VERSION_PATCH;
+unsigned int BSANET::bsa_get_version_major() {
+	return LIBBSA_VERSION_MAJOR;
+}
+unsigned int BSANET::bsa_get_version_minor() {
+	return LIBBSA_VERSION_MINOR;
+}
+unsigned int BSANET::bsa_get_version_patch() {
+	return LIBBSA_VERSION_PATCH;
 }
 
 
@@ -114,13 +119,8 @@ Error Handling Functions
 /* Outputs a string giving the a message containing the details of the
 last error or warning encountered by a function called for the given
 game handle. */
-unsigned int BSANET::bsa_get_error_message(String^ details) {
-	if (details == nullptr)
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
-
-	details = gcnew String(extErrorString);
-
-	return LIBBSA_OK;
+String^ BSANET::bsa_get_error_message() {
+	return gcnew String(extErrorString);
 }
 
 void BSANET::bsa_cleanup() {
@@ -229,9 +229,11 @@ Content Reading Functions
 /* Gets an array of all the assets in the given BSA that match the contentPath
 given. contentPath is a POSIX Extended regular expression that all asset
 paths within the BSA will be compared to. */
-unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ assetPaths) {
-	if (bh == nullptr || contentPath == nullptr || assetPaths == nullptr) //Check for valid args.
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
+cli::array<String^>^ BSANET::bsa_get_assets(String^ contentPath) {
+	if (bh == nullptr || contentPath == nullptr) { //Check for valid args.
+		c_error(LIBBSA_ERROR_INVALID_ARGS, "Null pointer passed.");
+		return nullptr;
+	}
 
 	//Free memory if in use.
 	if (bh->extAssets != nullptr) {
@@ -242,9 +244,6 @@ unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ as
 		bh->extAssetsNum = 0;
 	}
 
-	//Init values.
-	assetPaths = nullptr;
-
 	//Build regex expression. Also check that it is valid.
 	boost::regex regex;
 	char* ccontentPath = (char*)(void*)Marshal::StringToHGlobalAnsi(contentPath);
@@ -253,7 +252,8 @@ unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ as
 		regex = boost::regex(ccontentPath, boost::regex::extended | boost::regex::icase);
 	}
 	catch (boost::regex_error& e) {
-		return c_error(LIBBSA_ERROR_INVALID_ARGS, e.what());
+		c_error(LIBBSA_ERROR_INVALID_ARGS, e.what());
+		return nullptr;
 	}
 
 	//We don't know how many matches there will be, so put all matches into a temporary buffer first.
@@ -261,7 +261,7 @@ unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ as
 	bh->GetMatchingAssets(regex, temp);
 
 	if (temp.empty())
-		return LIBBSA_OK;
+		return nullptr;
 
 	//Fill external array.
 	try {
@@ -274,22 +274,24 @@ unsigned int BSANET::bsa_get_assets(String^ contentPath, cli::array<String^>^ as
 		}
 	}
 	catch (bad_alloc& e) {
-		return c_error(LIBBSA_ERROR_NO_MEM, e.what());
+		c_error(LIBBSA_ERROR_NO_MEM, e.what());
+		return nullptr;
 	}
 	catch (libbsa::error& e) {
-		return c_error(e.code(), e.what());
+		c_error(e.code(), e.what());
+		return nullptr;
 	}
 
 	// convert char** to array<String^>
 	char** cassetPaths = bh->extAssets;
 	std::vector<std::string> vAssets(cassetPaths, cassetPaths + bh->extAssetsNum);
-	assetPaths = gcnew cli::array<String^>(vAssets.size());
-	for (uint32_t i = 0; i < vAssets.size(); i++)
+	cli::array<String^>^ assetPaths = gcnew cli::array<String^>(vAssets.size());
+	for (int i = 0; i < vAssets.size(); i++)
 	{
 		assetPaths[i] = gcnew String(vAssets[i].c_str());
 	}
 
-	return LIBBSA_OK;
+	return assetPaths;
 }
 
 /* Checks if a specific asset, found within the BSA at assetPath, is in the given BSA. */

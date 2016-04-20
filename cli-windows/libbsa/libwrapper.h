@@ -117,7 +117,9 @@ namespace libbsa {
 		@param versionMinor A pointer to the minor version number.
 		@param versionPatch A pointer to the patch version number.
 		*/
-		void bsa_get_version(unsigned int ^ const versionMajor, unsigned int ^ const versionMinor, unsigned int ^ const versionPatch);
+		unsigned int bsa_get_version_major();
+		unsigned int bsa_get_version_minor();
+		unsigned int bsa_get_version_patch();
 
 
 		///@}
@@ -133,7 +135,7 @@ namespace libbsa {
 		@param details A pointer to the error details string outputted by the function.
 		@returns A return code.
 		*/
-		unsigned int bsa_get_error_message(String^ details);
+		String^ bsa_get_error_message();
 
 		/**
 		@brief Frees the memory allocated to the last error details string.
@@ -191,7 +193,7 @@ namespace libbsa {
 		@param numAssets The size of the outputted array. If no matching assets are found, this will be `0`.
 		@returns A return code.
 		*/
-		unsigned int bsa_get_assets(String^ contentPath, cli::array<String^>^ assetPaths);
+		cli::array<String^>^ bsa_get_assets(String^ contentPath);
 
 		/**
 		@brief Checks if a specific asset is in a BSA.
