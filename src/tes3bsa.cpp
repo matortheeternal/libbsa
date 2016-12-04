@@ -94,7 +94,7 @@ namespace libbsa { namespace tes3 {
                 //Find position of null pointer.
                 char * nptr = strchr((char*)(filenameRecords + filenameOffsets[i]), '\0');
                 if (nptr == NULL)
-                    throw error(LIBBSA_ERROR_PARSE_FAIL, "Structure of \"" + path + "\" is invalid.");
+                    throw error(LIBBSA_ERROR_PARSE_FAIL, "TES3BSA: Structure of \"" + path + "\" is invalid.");
 
                 fileData.path = ToUTF8(string((char*)(filenameRecords + filenameOffsets[i]), nptr - (char*)(filenameRecords + filenameOffsets[i])));
 

@@ -59,7 +59,7 @@ namespace libbsa { namespace tes4 {
             in.read((char*)&header, sizeof(Header));
 
             if ((header.version != BSA_VERSION_TES4 && header.version != BSA_VERSION_TES5) || header.offset != BSA_FOLDER_RECORD_OFFSET)
-                throw error(LIBBSA_ERROR_PARSE_FAIL, "Structure of \"" + path + "\" is invalid.");
+                throw error(LIBBSA_ERROR_PARSE_FAIL, "TES4BSA: Structure of \"" + path + "\" is invalid.");
 
             //Now we get to the real meat of the file.
             //Folder records are followed by file records in blocks by folder name, followed by file names.
@@ -116,7 +116,7 @@ namespace libbsa { namespace tes4 {
                     //Find position of null pointer.
                     char * nptr = strchr(filenameStart, '\0');
                     if (nptr == NULL)
-                        throw error(LIBBSA_ERROR_PARSE_FAIL, "Structure of \"" + path + "\" is invalid.");
+                        throw error(LIBBSA_ERROR_PARSE_FAIL, "TES4BSA: Structure of \"" + path + "\" is invalid.");
 
                     fileData.path += ToUTF8(string(filenameStart, nptr - filenameStart));
                     fileNameListPos += fileData.path.length() + 1;
@@ -322,7 +322,7 @@ namespace libbsa { namespace tes4 {
             }
 
             if (itr == endItr)
-                throw error(LIBBSA_ERROR_PARSE_FAIL, "Structure of \"" + path + "\" is invalid.");
+                throw error(LIBBSA_ERROR_PARSE_FAIL, "TES4BSA: Structure of \"" + path + "\" is invalid.");
 
             //Read data in.
             in.seekg(itr->offset, ios_base::beg);  //This is the offset in the old BSA.
