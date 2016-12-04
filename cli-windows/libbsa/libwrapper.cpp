@@ -26,6 +26,7 @@ along with libbsa.  If not, see
 #include "..\..\src\genericbsa.h"
 #include "..\..\src\tes3bsa.h"
 #include "..\..\src\tes4bsa.h"
+#include "..\..\src\ssebsa.h"
 #include "..\..\src\error.h"
 #include <boost/filesystem/detail/utf8_codecvt_facet.hpp>
 #include <boost/filesystem.hpp>
@@ -68,6 +69,7 @@ const unsigned int libbsa::LIBBSA_RETURN_MAX = libbsa::LIBBSA_ERROR_PARSE_FAIL;
 const unsigned int libbsa::LIBBSA_VERSION_TES3 = 0x00000001;
 const unsigned int libbsa::LIBBSA_VERSION_TES4 = 0x00000002;
 const unsigned int libbsa::LIBBSA_VERSION_TES5 = 0x00000004;
+const unsigned int libbsa::LIBBSA_VERSION_SSE  = 0x00000005;
 /* Use only one compression flag. */
 const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_0 = 0x00000010;
 const unsigned int libbsa::LIBBSA_COMPRESS_LEVEL_1 = 0x00000020;
@@ -152,6 +154,8 @@ unsigned int BSANET::bsa_open(String^ path) {
 			bh = new libbsa::tes3::BSA(pathc);
 		else if (libbsa::tes4::IsBSA(pathc))
 			bh = new libbsa::tes4::BSA(pathc);
+		else if (libbsa::sse::IsBSA(pathc))
+			bh = new libbsa::sse::BSA(pathc);
 		else
 			bh = new libbsa::tes4::BSA(pathc);  //Arbitrary choice of BSA type.
 	}
@@ -192,6 +196,11 @@ unsigned int BSANET::bsa_save(String^ path, const unsigned int flags) {
 		if (version > 0)
 			return c_error(LIBBSA_ERROR_INVALID_ARGS, "Cannot specify more than one version.");
 		version = LIBBSA_VERSION_TES5;
+	}
+	if (flags & LIBBSA_VERSION_SSE) {
+		if (version > 0)
+			return c_error(LIBBSA_ERROR_INVALID_ARGS, "Cannot specify more than one version.");
+		version = LIBBSA_VERSION_SSE;
 	}
 
 	//Now remove version flag from flags and check for compression flag duplication.

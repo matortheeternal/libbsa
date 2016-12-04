@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <windows.h>
 
 using namespace System;
 
@@ -63,6 +64,7 @@ namespace libbsa {
 	extern const unsigned int LIBBSA_VERSION_TES3;  ///< Specifies the BSA structure supported by TES III: Morrowind.
 	extern const unsigned int LIBBSA_VERSION_TES4;  ///< Specifies the BSA structure supported by TES IV: Oblivion.
 	extern const unsigned int LIBBSA_VERSION_TES5;  ///< Specifies the BSA structure supported by TES V:Skyrim, Fallout 3, Fallout: New Vegas.
+	extern const unsigned int LIBBSA_VERSION_SSE;   ///< Specifies the BSA structure supported by Skyrim: Special Edition.
 
 	///@}
 	/*********************//**
