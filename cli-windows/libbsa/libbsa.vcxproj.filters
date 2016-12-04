@@ -19,6 +19,9 @@
     <ClCompile Include="..\..\src\libbsa.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\ssebsa.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\error.h">
@@ -43,6 +46,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\libbsa.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ssebsa.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

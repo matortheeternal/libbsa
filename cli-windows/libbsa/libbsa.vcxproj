@@ -127,6 +127,7 @@
     <ClInclude Include="..\..\src\genericbsa.h" />
     <ClInclude Include="..\..\src\helpers.h" />
     <ClInclude Include="..\..\src\libbsa.h" />
+    <ClInclude Include="..\..\src\ssebsa.h" />
     <ClInclude Include="..\..\src\streams.h" />
     <ClInclude Include="..\..\src\tes3bsa.h" />
     <ClInclude Include="..\..\src\tes4bsa.h" />
@@ -136,6 +137,7 @@
     <ClCompile Include="..\..\src\genericbsa.cpp" />
     <ClCompile Include="..\..\src\helpers.cpp" />
     <ClCompile Include="..\..\src\libbsa.cpp" />
+    <ClCompile Include="..\..\src\ssebsa.cpp" />
     <ClCompile Include="..\..\src\tes3bsa.cpp" />
     <ClCompile Include="..\..\src\tes4bsa.cpp" />
     <ClCompile Include="libwrapper.cpp" />
