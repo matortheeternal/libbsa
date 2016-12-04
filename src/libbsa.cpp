@@ -68,6 +68,7 @@ const unsigned int LIBBSA_RETURN_MAX                = LIBBSA_ERROR_PARSE_FAIL;
 const unsigned int LIBBSA_VERSION_TES3              = 0x00000001;
 const unsigned int LIBBSA_VERSION_TES4              = 0x00000002;
 const unsigned int LIBBSA_VERSION_TES5              = 0x00000004;
+const unsigned int LIBBSA_VERSION_SSE				= 0x00000005;
 /* Use only one compression flag. */
 const unsigned int LIBBSA_COMPRESS_LEVEL_0          = 0x00000010;
 const unsigned int LIBBSA_COMPRESS_LEVEL_1          = 0x00000020;
@@ -188,6 +189,11 @@ LIBBSA unsigned int bsa_save (bsa_handle bh, const char * const path, const unsi
             return c_error(LIBBSA_ERROR_INVALID_ARGS, "Cannot specify more than one version.");
         version = LIBBSA_VERSION_TES5;
     }
+	if (flags & LIBBSA_VERSION_SSE) {
+		if (version > 0)
+			return c_error(LIBBSA_ERROR_INVALID_ARGS, "Cannot specify more than one version.");
+		version = LIBBSA_VERSION_SSE;
+	}
 
     //Now remove version flag from flags and check for compression flag duplication.
     compression = flags ^ version;
