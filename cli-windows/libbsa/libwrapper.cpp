@@ -152,10 +152,10 @@ unsigned int BSANET::bsa_open(String^ path) {
 	try {
 		if (libbsa::tes3::IsBSA(pathc))
 			bh = new libbsa::tes3::BSA(pathc);
-		else if (libbsa::tes4::IsBSA(pathc))
-			bh = new libbsa::tes4::BSA(pathc);
 		else if (libbsa::sse::IsBSA(pathc))
 			bh = new libbsa::sse::BSA(pathc);
+		else if (libbsa::tes4::IsBSA(pathc))
+			bh = new libbsa::tes4::BSA(pathc);
 		else
 			bh = new libbsa::tes4::BSA(pathc);  //Arbitrary choice of BSA type.
 	}

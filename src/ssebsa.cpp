@@ -474,13 +474,15 @@ namespace libbsa {
 				return false;
 			else {
 				uint32_t magic;
+				uint32_t version;
 				libbsa::ifstream in(fs::path(path), ios::binary);
 				in.exceptions(ios::failbit | ios::badbit | ios::eofbit);  //Causes ifstream::failure to be thrown if problem is encountered.
 
 				in.read((char*)&magic, sizeof(uint32_t));
+				in.read((char*)&version, sizeof(uint32_t));
 				in.close();
 
-				return magic == BSA_MAGIC;  //Magic is actually tes3 bsa version.
+				return (magic == BSA_MAGIC) && (version == BSA_VERSION_SSE);
 			}
 		}
 	}
